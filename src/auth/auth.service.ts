@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -26,6 +27,9 @@ import { LogoutDto } from './dto/logout.dto';
 
 @Injectable()
 export class AuthService {
+
+  private readonly logger: Logger = new Logger(AuthService.name)
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -48,7 +52,8 @@ export class AuthService {
 
     //si existe lanzo la excepcion
     if (existingUser) {
-      throw new ConflictException('Ya existe un usuario registrado con las credenciales ingresadas');
+      this.logger.error(new ConflictException('[AuthService][Register] El email ingresado ya está registrado con otro usuario del sistema.'))
+      throw new ConflictException('El email ingresado ya está registrado con otro usuario del sistema.');
     }
 
     //Encripto la contraseña y si está ok creo y guardo el usuario
@@ -83,6 +88,8 @@ export class AuthService {
       });
       await queryRunner.manager.save(newUser);
 
+      this.logger.log('[AuthService][Register] Usuario guardado correctamente')
+
       const userRoles = registerDto.roles.map((roleName) => {
         const role = existingRoles.find((r) => r.name === roleName);
         return this.userRoleRepository.create({
@@ -94,23 +101,29 @@ export class AuthService {
       await queryRunner.manager.save(userRoles);
       await queryRunner.commitTransaction();
 
+      this.logger.log('[AuthService][Register] Roles asignados al usuario correctamente')
+
       const response: ResponseRegisterDto = {
         nombre: newUser.name,
         email: newUser.email,
         roles: userRoles.map(userRole => userRole.role.name)
       }
 
+      this.logger.log('[AuthService][Register] Usuario creado ' + JSON.stringify(response))
+
       return response
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
       if (error instanceof HttpException) {
+        this.logger.error(error)
         throw error;
       }
 
+      this.logger.error('[AuthService][Register] Ocurrió un error al registrar el usuario.')
       throw new InternalServerErrorException('Ocurrió un error al registrar el usuario.')
     }
-    finally{
+    finally {
       await queryRunner.release()
     }
   }
@@ -128,13 +141,14 @@ export class AuthService {
       //Busco si el usuario tiene una session activa
       const existingSession = await this.sessionRepository.findOne({
         where: {
-          user: {id: user.id}
+          user: { id: user.id }
         }
       })
 
       //Si existe una sesion utilizo el token guardado en ese registro
-      if(existingSession) {
-        return {accessToken: existingSession.token}
+      if (existingSession) {
+        this.logger.log(`[AuthService][Login] Token de sesión existente: ${existingSession.token}`)
+        return { accessToken: existingSession.token }
       }
 
       //Acá comienzo a crear el JWT con el id del usuario y sus roles
@@ -154,9 +168,12 @@ export class AuthService {
       });
       await this.sessionRepository.save(session);
 
-      return {accessToken: token.accessToken};
+      this.logger.log('[AuthService][Login] Session asignada al usuario correctamente')
+      this.logger.log('[AuthService][Login] AccessToken: ' + token.accessToken)
+
+      return { accessToken: token.accessToken };
     } else {
-      console
+      this.logger.error('[AuthService][Login] Credenciales incorrectas')
       throw new NotFoundException('Credenciales incorrectas');
     }
   }
@@ -181,12 +198,18 @@ export class AuthService {
           statusCode: HttpStatus.OK,
           message: 'Sesión eliminada correctamente'
         }
+
+        this.logger.log('[AuthService][Logout] Sesion del usuario eliminada correctamente.')
+
         return response
       } else {
+        this.logger.error('[AuthService][Logout] No existe una session del usuario ingresado')
         throw new NotFoundException('No existe una session del usuario ingresado');
       }
     } else {
-      throw new NotFoundException('No existe un usuario con el id ingresado');
+      this.logger.error('[AuthService][Logout] Credenciales incorrectas')
+
+      throw new NotFoundException('Credenciales incorrectas');
     }
   }
 
@@ -194,7 +217,8 @@ export class AuthService {
     try {
 
       if (!token) {
-        throw new NotFoundException('Token no existente');
+        this.logger.error('[AuthService][ValidateAccess] Token no existente.')
+        throw new NotFoundException('Token no existente.');
       }
 
       const tokenFinal = token.slice(7);
@@ -205,7 +229,8 @@ export class AuthService {
       });
 
       if (!session) {
-        throw new BadRequestException('Sesión no existente o vencida');
+        this.logger.error('[AuthService][ValidateAccess] Sesión no existente o vencida.')
+        throw new BadRequestException('Sesión no existente o vencida.');
       } else {
         const decodedToken: any = this.jwtService.decode(tokenFinal);
         const currentDate = Math.floor(Date.now() / 1000)
@@ -221,10 +246,8 @@ export class AuthService {
         return roles;
       }
     } catch (error: any) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      this.logger.error(`[AuthService][ValidateAccess] Error al validar el acceso: ${error.message}`)
+      throw new BadRequestException(error.message);
     }
   }
 }
