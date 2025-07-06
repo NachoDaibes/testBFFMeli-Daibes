@@ -8,6 +8,7 @@ import { UserRole } from './entities/userRole.entity';
 import { Session } from './entities/session.entity';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { MarketplaceModule } from './marketplace/marketplace.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { AuthModule } from './auth/auth.module';
       ],
       synchronize: true,
     }),
-    AuthModule
+    AuthModule,
+    MarketplaceModule
   ],
   controllers: [AppController],
   providers: [AppService],
