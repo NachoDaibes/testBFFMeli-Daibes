@@ -1,9 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MarketplaceService } from './marketplace.service';
 import { MarketplaceController } from './marketplace.controller';
+import { AuthService } from 'src/auth/auth.service';
+import { User } from 'src/entities/user.entity';
+import { UserRole } from 'src/entities/userRole.entity';
+import { Role } from 'src/entities/role.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { Session } from 'src/entities/session.entity';
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([User, Session, UserRole, Role])
+  ],
   controllers: [MarketplaceController],
-  providers: [MarketplaceService],
+  providers: [MarketplaceService, AuthService, JwtService],
 })
 export class MarketplaceModule {}
