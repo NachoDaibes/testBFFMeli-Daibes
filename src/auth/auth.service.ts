@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ExecutionContext,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -24,6 +25,9 @@ import { RolesEnum } from 'src/enum/roles.enum';
 import { ResponseRegisterDto } from './dto/responseRegister.dto';
 import { NotFoundError } from 'rxjs';
 import { LogoutDto } from './dto/logout.dto';
+import { ValidateXAuthTokenDto } from './dto/validateXAuthToken.dto';
+import { config } from 'dotenv';
+config();
 
 @Injectable()
 export class AuthService {
@@ -249,5 +253,23 @@ export class AuthService {
       this.logger.error(`[AuthService][ValidateAccess] Error al validar el acceso: ${error.message}`)
       throw new BadRequestException(error.message);
     }
+  }
+
+  //Metodo para validar el x-auth-token
+  public validateXAuthToken(token: string): ValidateXAuthTokenDto{
+
+    const validToken = process.env.VALID_TOKEN
+    const mockToken = process.env.MOCK_TOKEN
+    const response: ValidateXAuthTokenDto = new ValidateXAuthTokenDto()
+
+    if(token == validToken){
+      response.isValid = true
+      response.isMock = false
+    }else if(token == mockToken){
+      response.isValid = true
+      response.isMock = true
+    }
+
+    return response
   }
 }
