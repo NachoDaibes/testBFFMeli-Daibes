@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import { ErrorResponseDto } from './dto/errorResponse.dto';
 import { CategoryDto, ItemDto, ResponseGetDto } from './dto/responseGet.dto';
 import { ResponseDeleteDto } from './dto/responseDelete.dto';
-import { SearchProductsQueryDto } from './dto/searchProductsQuery.dto';
+import { SearchProductsQueryDto, SortParamsDto } from './dto/searchProductsQuery.dto';
 import { PagingDto, ProductDto, ResponseProductsByQueryDto } from './dto/responseProductsByQuery.dto';
 config();
 
@@ -83,7 +83,7 @@ export class MarketplaceService {
     }
   }
 
-  async getAllByCategory(category: string, query: SearchProductsQueryDto): Promise<ResponseGetDto> {
+  async getAllByCategory(category: string, query: SortParamsDto): Promise<ResponseGetDto> {
     try {
       //Valido si existen las urls en las variables de entorno
       this.validateEnvVariables();
@@ -280,7 +280,7 @@ export class MarketplaceService {
   }
 
   //Metodo para paginar la lista de productos
-  private createPaginatedProducts(query: SearchProductsQueryDto, products: any) {
+  private createPaginatedProducts(query: SearchProductsQueryDto | SortParamsDto, products: any) {
     const limit = query.limit ? +query.limit : 20;
     const offset = query.offset ? +query.offset : 0;
 

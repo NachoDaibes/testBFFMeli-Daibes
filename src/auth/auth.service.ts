@@ -182,9 +182,9 @@ export class AuthService {
     }
   }
 
-  async logout(userId: number) {
+  async logout(userEmail: string) {
     //Busco el usuario por ID
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({ where: { email: userEmail } });
 
     //Si existe busco su ultima session y la borro
     if (user) {

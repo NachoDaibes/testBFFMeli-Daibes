@@ -1,24 +1,25 @@
-import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator"
+import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class SearchProductsQueryDto{
+export class SortParamsDto {
+  @IsOptional()
+  @IsIn(['price', 'rating'])
+  sortBy?: 'price' | 'rating';
 
-    @IsNotEmpty()
-    @IsString()
-    q: string
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  order?: 'asc' | 'desc' = 'asc';
 
-    @IsOptional()
-    @IsIn(['price', 'rating'])
-    sortBy?: 'price' | 'rating'
+  @IsOptional()
+  @IsInt()
+  limit?: number;
 
-    @IsOptional()
-    @IsIn(['asc', 'desc'])
-    order?: 'asc' | 'desc' = 'asc'
+  @IsOptional()
+  @IsInt()
+  offset?: number;
+}
 
-    @IsOptional()
-    @IsInt()
-    limit?: number
-
-    @IsOptional()
-    @IsInt()
-    offset?: number
+export class SearchProductsQueryDto extends SortParamsDto {
+  @IsNotEmpty()
+  @IsString()
+  q: string;
 }
