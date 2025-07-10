@@ -2,6 +2,10 @@ import { Controller, Get, Headers, Param, Delete, UnauthorizedException, Logger,
 import { MarketplaceService } from './marketplace.service';
 import { AuthService } from 'src/auth/auth.service';
 import { SearchProductsQueryDto } from './dto/searchProductsQuery.dto';
+import { getProductsByQueryMock } from './mock/mockProductsByQuery.mock';
+import { GetAllByCategoryMock } from './mock/getAllByCategory.mock';
+import { DeleteAllByCategoryMock } from './mock/deleteAllByCategory.mock';
+import { ApiSecurity } from '@nestjs/swagger';
 
 @Controller('marketplace')
 export class MarketplaceController {
@@ -12,20 +16,16 @@ export class MarketplaceController {
     private readonly authService: AuthService,
   ) {}
 
+  @ApiSecurity('X-AUTH-TOKEN')
   @Get('getProductsByQuery')
-  getProductsByQuery(
-    @Query() query: SearchProductsQueryDto,
-    @Headers('x-auth-token') token: string,
-    @Headers() headers: Record<string, string>,
-  ) {
-    const validateToken = this.authService.validateXAuthToken(token);
+  getProductsByQuery(@Query() query: SearchProductsQueryDto, @Headers() headers: Record<string, string>) {
+    const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
     if (!validateToken.isValid) {
       this.logger.error('Token inválido. Unauthorized.');
       throw new UnauthorizedException();
     } else if (validateToken.isMock) {
-      //devolver datos mockeados
-      return 'datos mock';
+      return getProductsByQueryMock;
     }
 
     const site = headers.site;
@@ -33,7 +33,11 @@ export class MarketplaceController {
   }
 
   @Get('getAllByCategory/:category')
-  getAllByCategory(@Headers('x-auth-token') token: string, @Param('category') category: string) {
+  getAllByCategory(
+    @Query() query: SearchProductsQueryDto,
+    @Param('category') category: string,
+    @Headers() headers: Record<string, string>,
+  ) {
     // /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
     // una excepcion de 'Acceso denegado'*/
     // const validate: string[] = await this.authService.validateAccess(token)
@@ -45,21 +49,21 @@ export class MarketplaceController {
     //   throw new UnauthorizedException()
     // }
 
-    const validateToken = this.authService.validateXAuthToken(token);
+    const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
     if (!validateToken.isValid) {
       this.logger.error('Token inválido. Unauthorized.');
       throw new UnauthorizedException();
     } else if (validateToken.isMock) {
       //devolver datos mockeados
-      return 'datos mock';
+      return GetAllByCategoryMock;
     }
 
-    return this.marketplaceService.getAllByCategory(category);
+    return this.marketplaceService.getAllByCategory(category, query);
   }
 
   @Delete('deleteAllByCategory/:category')
-  deleteAllByCategory(@Headers('x-auth-token') token: string, @Param('category') category: string) {
+  deleteAllByCategory(@Headers() headers: Record<string, string>, @Param('category') category: string) {
     // /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
     // una excepcion de 'Acceso denegado'*/
     // const validate: string[] = await this.authService.validateAccess(token)
@@ -71,14 +75,14 @@ export class MarketplaceController {
     //   throw new UnauthorizedException()
     // }
 
-    const validateToken = this.authService.validateXAuthToken(token);
+    const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
     if (!validateToken.isValid) {
       this.logger.error('Token inválido. Unauthorized.');
       throw new UnauthorizedException();
     } else if (validateToken.isMock) {
       //devolver datos mockeados
-      return 'datos mock';
+      return DeleteAllByCategoryMock;
     }
 
     return this.marketplaceService.deleteAllByCategory(category);

@@ -29,7 +29,7 @@ export class MarketplaceService {
       const freeShhippingResponse = await axios.get(process.env.FREE_SHIPPING_URL);
       const freeShipping = freeShhippingResponse.data.products;
 
-      if (query.sortBy) {
+      if (query.sortBy && (query.sortBy == 'rating' || query.sortBy == 'price')) {
         const order = query.order?.toLowerCase() == 'desc' ? 'desc' : 'asc';
 
         products.sort((a, b) => {
@@ -43,6 +43,9 @@ export class MarketplaceService {
           }
         });
         this.logger.log(`[MarketplaceService][getProductsByQuery] Productos ordenados por ${query.sortBy} (${order}).`);
+      }else if(query.sortBy && !(query.sortBy == 'rating' || query.sortBy == 'price')){
+        this.logger.error('[MarketplaceService][getProductsByQuery] El ordenamiento puede ser por price o rating.')
+        throw new BadRequestException('El ordenamiento puede ser por price o rating.')
       }
 
       const { limit, offset, paginatedProducts } = this.createPaginatedProducts(query, products);
@@ -50,10 +53,10 @@ export class MarketplaceService {
       const finalProducts: ResponseProductsByQueryDto = this.createFinalProductsDto(
         limit,
         offset,
-        products,
         paginatedProducts,
         freeShipping,
       );
+      finalProducts.paging.total = products.length
 
       return finalProducts;
     } catch (error) {
@@ -80,7 +83,7 @@ export class MarketplaceService {
     }
   }
 
-  async getAllByCategory(category: string): Promise<ResponseGetDto> {
+  async getAllByCategory(category: string, query: SearchProductsQueryDto): Promise<ResponseGetDto> {
     try {
       //Valido si existen las urls en las variables de entorno
       this.validateEnvVariables();
@@ -89,11 +92,35 @@ export class MarketplaceService {
       await this.validateCategory(category);
 
       //Busco los productos por categoria y los freeShipping de todos los productos
-      const productsByCategory = await axios.get(`${process.env.PRODUCTS_BASE_URL}/category/${category}`);
+      const productsResponse = await axios.get(`${process.env.PRODUCTS_BASE_URL}/category/${category}`);
+      let productsByCategory = productsResponse.data.products ?? [];
       const freeShipping = await axios.get(process.env.FREE_SHIPPING_URL);
 
+      if (query.sortBy && (query.sortBy == 'rating' || query.sortBy == 'price')) {
+        const order = query.order?.toLowerCase() == 'desc' ? 'desc' : 'asc';
+
+        productsByCategory.sort((a, b) => {
+          const valueA = a[query.sortBy];
+          const valueB = b[query.sortBy];
+
+          if (order === 'asc') {
+            return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+          } else {
+            return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+          }
+        });
+        this.logger.log(`[MarketplaceService][getAllByCategory] Productos ordenados por ${query.sortBy} (${order}).`);
+      }else if(query.sortBy && !(query.sortBy == 'rating' || query.sortBy == 'price')){
+        this.logger.error('[MarketplaceService][getAllByCategory] El ordenamiento puede ser por price o rating.')
+        throw new BadRequestException('El ordenamiento puede ser por price o rating.')
+      }
+
+      const { limit, offset, paginatedProducts } = this.createPaginatedProducts(query, productsByCategory);
+
       //Armo el ResponseGetDto
-      const responseGetDto: ResponseGetDto = this.createResponseGetDto(productsByCategory.data.products, freeShipping.data.products);
+      const responseGetDto: ResponseGetDto = this.createResponseGetDto(paginatedProducts, freeShipping.data.products, limit, offset);
+      responseGetDto.paging.total = productsByCategory.length
+
       this.logger.log('[MarketplaceService][getAllByCategory] ResponseGetDto armado correctamente.');
 
       return responseGetDto;
@@ -194,13 +221,16 @@ export class MarketplaceService {
 
   //Otros métodos
   //Metodo para crear el ResponseDto
-  private createResponseGetDto(productsByCategory: any[], freeShipping: any) {
+  private createResponseGetDto(productsByCategory: any[], freeShipping: any, limit: number, offset: number) {
     //Inicializo el ResponseGetDto
     const responseGetDto: ResponseGetDto = new ResponseGetDto();
     responseGetDto.category = new CategoryDto();
+    responseGetDto.paging = new PagingDto()
 
     //Comienzo a asignarle valores
     responseGetDto.category.name = productsByCategory[0].category;
+    responseGetDto.paging.limit = limit
+      responseGetDto.paging.offset = offset
     responseGetDto.items = [];
 
     productsByCategory.forEach(product => {
@@ -269,7 +299,7 @@ export class MarketplaceService {
   }
 
   //Metodo para crear la respuesta final del endpoint GetProductsByQuery
-  private createFinalProductsDto(limit: number, offset: number, products: any, paginatedProducts: any, freeShipping: any) {
+  private createFinalProductsDto(limit: number, offset: number, paginatedProducts: any, freeShipping: any) {
     const finalProducts: ResponseProductsByQueryDto = new ResponseProductsByQueryDto();
     finalProducts.paging = new PagingDto();
     finalProducts.categories = [];
@@ -277,7 +307,6 @@ export class MarketplaceService {
 
     finalProducts.paging.limit = limit;
     finalProducts.paging.offset = offset;
-    finalProducts.paging.total = products.length; //cambiar
 
     paginatedProducts.map(product => {
       if (!finalProducts.categories.includes(product.category)) {

@@ -8,7 +8,7 @@ export class SearchProductsQueryDto{
 
     @IsOptional()
     @IsIn(['price', 'rating'])
-    sortBy?: 'price' | ' rating'
+    sortBy?: 'price' | 'rating'
 
     @IsOptional()
     @IsIn(['asc', 'desc'])
