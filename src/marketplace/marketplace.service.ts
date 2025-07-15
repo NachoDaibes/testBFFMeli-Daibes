@@ -252,12 +252,12 @@ export class MarketplaceService {
   }
 
   //Metodo para calcular el descuento
-  private getPriceDiscount(price: number, discountPercentage: number) {
+  public getPriceDiscount(price: number, discountPercentage: number) {
     return (price * discountPercentage) / 100;
   }
 
   //Metodo para validar la categoria ingresada
-  private async validateCategory(category: string) {
+  public async validateCategory(category: string) {
     const categories = await axios.get(`${process.env.PRODUCTS_BASE_URL}/category-list`);
 
     this.logger.log(`[MarketplaceService][validateCategory] Lista de categorías: ${JSON.stringify(categories.data)}`);
@@ -272,7 +272,7 @@ export class MarketplaceService {
   }
 
   //Metodo para validar si existen las variables de entorno
-  private validateEnvVariables() {
+  public validateEnvVariables() {
     if (!process.env.PRODUCTS_BASE_URL || !process.env.FREE_SHIPPING_URL) {
       this.logger.error('[MarketplaceService][validateEnvVariables] Faltan variables de entorno');
       throw new InternalServerErrorException('Faltan URLs de configuración');

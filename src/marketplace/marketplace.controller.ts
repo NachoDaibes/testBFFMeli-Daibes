@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Param, Delete, UnauthorizedException, Logger, BadRequestException, Query } from '@nestjs/common';
+import { Controller, Get, Headers, Param, Delete, UnauthorizedException, Logger, BadRequestException, Query, Req } from '@nestjs/common';
 import { MarketplaceService } from './marketplace.service';
 import { AuthService } from 'src/auth/auth.service';
 import { SearchProductsQueryDto, SortParamsDto } from './dto/searchProductsQuery.dto';
@@ -64,18 +64,25 @@ export class MarketplaceController {
     description: 'Qué producto es el primero en ser tomado.',
   })
   @Get('getProductsByQuery')
-  getProductsByQuery(@Query() query: SearchProductsQueryDto, @Headers() headers: Record<string, string>) {
+  getProductsByQuery(@Query() query: SearchProductsQueryDto, @Headers() headers: Record<string, string>, @Req() req: Request) {
+    this.logger.log(`[GET] ${req.url}`);
+    this.logger.log(`Headers: ${JSON.stringify(headers)}`);
+    this.logger.log(`Query: ${JSON.stringify(query)}`);
+
     const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
     if (!validateToken.isValid) {
       this.logger.error('Token inválido. Unauthorized.');
       throw new UnauthorizedException();
     } else if (validateToken.isMock) {
+      this.logger.log(`Response: ${getProductsByQueryMock}`);
       return getProductsByQueryMock;
     }
 
     const site = headers.site;
-    return this.marketplaceService.getProductsByQuery(site, query);
+    const response = this.marketplaceService.getProductsByQuery(site, query);
+    this.logger.log(`Response: ${response}`);
+    return response;
   }
 
   @ApiSecurity('X-AUTH-TOKEN')
@@ -115,7 +122,12 @@ export class MarketplaceController {
     description: 'Qué producto es el primero en ser tomado.',
   })
   @Get('getAllByCategory/:category')
-  getAllByCategory(@Query() sortParamsDto: SortParamsDto, @Param('category') category: string, @Headers() headers: Record<string, string>) {
+  getAllByCategory(
+    @Query() sortParamsDto: SortParamsDto,
+    @Param('category') category: string,
+    @Headers() headers: Record<string, string>,
+    @Req() req: Request,
+  ) {
     // /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
     // una excepcion de 'Acceso denegado'*/
     // const validate: string[] = await this.authService.validateAccess(token)
@@ -126,6 +138,10 @@ export class MarketplaceController {
     // }else{
     //   throw new UnauthorizedException()
     // }
+    this.logger.log(`[GET] ${req.url}`);
+    this.logger.log(`SortParamsDto: ${JSON.stringify(sortParamsDto)}`);
+    this.logger.log(`Category: ${JSON.stringify(category)}`);
+    this.logger.log(`Headers: ${JSON.stringify(headers)}`);
 
     const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
@@ -134,10 +150,15 @@ export class MarketplaceController {
       throw new UnauthorizedException();
     } else if (validateToken.isMock) {
       //devolver datos mockeados
+      this.logger.log(`Response: ${GetAllByCategoryMock}`);
+
       return GetAllByCategoryMock;
     }
 
-    return this.marketplaceService.getAllByCategory(category, sortParamsDto);
+    const response = this.marketplaceService.getAllByCategory(category, sortParamsDto);
+    this.logger.log(`Response: ${response}`);
+
+    return response;
   }
 
   @ApiSecurity('X-AUTH-TOKEN')
@@ -153,7 +174,7 @@ export class MarketplaceController {
     description: 'Token de autenticación requerido para utilizar el endpoint.',
   })
   @Delete('deleteAllByCategory/:category')
-  deleteAllByCategory(@Headers() headers: Record<string, string>, @Param('category') category: string) {
+  deleteAllByCategory(@Headers() headers: Record<string, string>, @Param('category') category: string, @Req() req: Request) {
     // /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
     // una excepcion de 'Acceso denegado'*/
     // const validate: string[] = await this.authService.validateAccess(token)
@@ -164,6 +185,9 @@ export class MarketplaceController {
     // }else{
     //   throw new UnauthorizedException()
     // }
+    this.logger.log(`[GET] ${req.url}`);
+    this.logger.log(`Headers: ${JSON.stringify(headers)}`);
+    this.logger.log(`Category: ${JSON.stringify(category)}`);
 
     const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
@@ -172,9 +196,13 @@ export class MarketplaceController {
       throw new UnauthorizedException();
     } else if (validateToken.isMock) {
       //devolver datos mockeados
+      this.logger.log(`Response: ${DeleteAllByCategoryMock}`);
       return DeleteAllByCategoryMock;
     }
 
-    return this.marketplaceService.deleteAllByCategory(category);
+    const response = this.marketplaceService.deleteAllByCategory(category);
+    this.logger.log(`Response: ${response}`);
+
+    return response;
   }
 }

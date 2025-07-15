@@ -1,73 +1,73 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# 🛒 Marketplace - Daibes
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Challenge técnico de Mercado Libre resuelto por **Juan Ignacio Daibes**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🧰 Tecnologías utilizadas
 
-## Description
+- **NestJS** v9.4.2
+- **Node.js** v22.17.0
+- **TypeORM** + **MySQL**
+- **Swagger** (documentación)
+- **Axios** (para llamadas HTTP)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Instalación y ejecución
 
-## Installation
+1. Instalar dependencias:
+   ```bash
+   npm install
 
-```bash
-$ npm install
-```
+2. Levantar el proyecto:
+  ```bash
+   npm run start
 
-## Running the app
+## Documentación en Swagger
 
-```bash
-# development
-$ npm run start
+  Disponible en:
+  http://localhost:3000/api-docs
 
-# watch mode
-$ npm run start:dev
+## 🚀 Endpoints disponibles
 
-# production mode
-$ npm run start:prod
-```
+- (GET) marketplace/getProductsByQuery
 
-## Test
+  Curl de ejemplo: 
 
-```bash
-# unit tests
-$ npm run test
 
-# e2e tests
-$ npm run test:e2e
+- (GET) martketplace/getProductsByCategory
 
-# test coverage
-$ npm run test:cov
-```
+  Curl de ejemplo: 
 
-## Support
+- (DELETE) marketplace/deleteProductsByCategory
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+  Curl de ejemplo: 
 
-## Stay in touch
+## Autenticación
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Se valida el header "x-auth-token". En caso de ser un token válido, se permitirá el acceso al método, en caso de ser un 
+token alternativo se retornará un ejemplo mockeado y en caso de ser un token inválido se retornará 401 Unauthorized.
 
-## License
+## Variables de entorno
 
-Nest is [MIT licensed](LICENSE).
+- (Credenciales para la conexion a la DB con un usuario con permisos limitados)
+    DB_HOST=35.239.114.233
+    DB_PORT=3306
+    DB_USER=onlyRead
+    DB_PASSWORD=OnlyRead11
+    DB_NAME=testMeliDev
+
+- (Llave para JWT)
+    JWT_SECRET_KEY=CLAVE-DAIBES11
+
+- (Urls de los servicios externos)
+    PRODUCTS_BASE_URL=https://dummyjson.com/products
+    FREE_SHIPPING_URL=https://www.mockachino.com/301a2290-f16a-44//free_shipping
+
+- (Token Valido y token mock)
+    VALID_TOKEN=e962f81a-4d42-4eb3-86cd-a25e7237c8dc
+    MOCK_TOKEN=55a4639f-55e8-4e14-a6cc-b79977b20a4e
+
+## Estructura de ramas en GitHub
+
+  - feature/*: ramas de funcionalidades
+  - develop: rama de desarrollo principal
+  - relase/*: ramas de QA o PRE Produccion
+  - master: rama principal o Produccion
