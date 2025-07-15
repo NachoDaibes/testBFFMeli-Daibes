@@ -6,11 +6,13 @@ import { CategoryDto, ItemDto, ResponseGetDto } from './dto/responseGet.dto';
 import { ResponseDeleteDto } from './dto/responseDelete.dto';
 import { SearchProductsQueryDto, SortParamsDto } from './dto/searchProductsQuery.dto';
 import { PagingDto, ProductDto, ResponseProductsByQueryDto } from './dto/responseProductsByQuery.dto';
+import { ErrorInterceptorService } from 'src/interceptor/errorInterceptor';
 config();
 
 @Injectable()
 export class MarketplaceService {
   private readonly logger: Logger = new Logger(MarketplaceService.name);
+  private readonly errorInterceptor: ErrorInterceptorService = new ErrorInterceptorService()
 
   async getProductsByQuery(site: string, query: SearchProductsQueryDto) {
     try {
@@ -61,25 +63,7 @@ export class MarketplaceService {
       return finalProducts;
     } catch (error) {
       this.logger.error(`[MarketplaceService][getProductsByQuery] ${error.message}`);
-
-      //Si el error es una instancia de un Axios error armo la respuesta en base a eso
-      if (axios.isAxiosError(error)) {
-        const response: ErrorResponseDto = {
-          status: 'AXIOS_ERROR',
-          statusCode: error.response?.status,
-          message: error.response?.data?.message || error.response?.statusText || 'Error con el servicio externo.',
-        };
-        throw new BadRequestException(response);
-      }
-
-      //Si no lanzo una respuesta general
-      const generalErrorResponse: ErrorResponseDto = {
-        status: error.name || 'INTERNAL_SERVER_ERROR',
-        statusCode: error.status || 500,
-        message: error.message || 'Error inesperado con el servidor',
-      };
-
-      throw new InternalServerErrorException(generalErrorResponse);
+      this.errorInterceptor.handle(error)
     }
   }
 
@@ -126,26 +110,8 @@ export class MarketplaceService {
       return responseGetDto;
     } catch (error) {
       this.logger.error(`[MarketplaceService][getAllByCategory] ${error.message}`);
-
-      //Si el error es una instancia de un Axios error armo la respuesta en base a eso
-      if (axios.isAxiosError(error)) {
-        const response: ErrorResponseDto = {
-          status: 'AXIOS_ERROR',
-          statusCode: error.response?.status,
-          message: error.response?.data?.message || error.response?.statusText || 'Error con el servicio externo.',
-        };
-        throw new BadRequestException(response);
+      this.errorInterceptor.handle(error)
       }
-
-      //Si no lanzo una respuesta general
-      const generalErrorResponse: ErrorResponseDto = {
-        status: error.name || 'INTERNAL_SERVER_ERROR',
-        statusCode: error.status || 500,
-        message: error.message || 'Error inesperado con el servidor',
-      };
-
-      throw new InternalServerErrorException(generalErrorResponse);
-    }
   }
 
   async deleteAllByCategory(category: string) {
@@ -185,11 +151,9 @@ export class MarketplaceService {
       const responseDeleteDto: ResponseDeleteDto = {
         result: 'OK',
         items_delete: productsByCategory.length,
-        items_failed: failedDeletes.length,
-        items_failed_ids: failedDeletes,
       };
 
-      if (failedDeletes.length >= 0) {
+      if (failedDeletes.length > 0) {
         responseDeleteDto.items_failed = failedDeletes.length;
         responseDeleteDto.items_failed_ids = failedDeletes;
       }
@@ -197,27 +161,11 @@ export class MarketplaceService {
       return responseDeleteDto;
     } catch (error) {
       this.logger.error(`[MarketplaceService][deleteAllByCategory] ${error.message}`);
-
-      //Si el error es una instancia de un Axios error armo la respuesta en base a eso
-      if (axios.isAxiosError(error)) {
-        const response: ErrorResponseDto = {
-          status: 'AXIOS_ERROR',
-          statusCode: error.response?.status,
-          message: error.response?.data?.message || error.response?.statusText || 'Error con el servicio externo.',
-        };
-        throw new BadRequestException(response);
-      }
-
-      //Si no lanzo una respuesta general
-      const generalErrorResponse: ErrorResponseDto = {
-        status: error.name || 'INTERNAL_SERVER_ERROR',
-        statusCode: error.status || 500,
-        message: error.message || 'Error inesperado con el servidor',
-      };
-
-      throw new InternalServerErrorException(generalErrorResponse);
+      this.errorInterceptor.handle(error)
     }
   }
+
+
 
   //Otros métodos
   //Metodo para crear el ResponseDto

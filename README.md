@@ -2,7 +2,32 @@
 
 Challenge técnico de Mercado Libre resuelto por **Juan Ignacio Daibes**.
 
-## 🧰 Tecnologías utilizadas
+## Breve explicación
+
+Con este código presento la solución que encontré para el challenge técnico que me enviaron. Para resolverlo utilicé nestjs (que es un framework de nodejs), typescript, swagger y para los test utilicé jest junto con la librería de testing que proporciona nestjs.
+
+### Autenticación
+
+#### Autenticación por "x-auth-token"
+
+La autenticación se realiza mediante el envío de un header "x-auth-token". Dependiendo del token que se envíe, el sistema responde de la siguiente manera:
+
+- Token válido: permite acceder al circuito completo.
+- Token alternativo: devuelve una respuesta mockeada.
+- Token inválido: devuelve un error 401 Unauthorized.
+
+
+#### Otra rama con autenticación alternativa
+En la rama feature/auth está la misma solución pero con un método de autenticación distinto. En este caso, armé un pequeño modelo que incluye las entidades User, Role, Session y UserRole, con tres endpoints ubicados en src/auth/auth.controller.ts.
+
+Para usar esta autenticación:
+
+1. Primero hay que registrarse mediante el endpoint Register.
+2. Luego iniciar sesión con el endpoint Login.
+3. A partir de ahí, en los endpoints protegidos se debe enviar un header authorization con el valor:
+  "Bearer ${token devuelto por el login}".
+
+## Tecnologías utilizadas
 
 - **NestJS** v9.4.2
 - **Node.js** v22.17.0
@@ -31,14 +56,23 @@ Challenge técnico de Mercado Libre resuelto por **Juan Ignacio Daibes**.
 
   Curl de ejemplo: 
 
+curl --location 'http://localhost:3000/marketplace/getProductsByQuery?q=apple&sortBy=rating&offset=1&limit=4&order=asc' \
+--header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc' \
+--header 'site: MLA'
 
 - (GET) martketplace/getProductsByCategory
 
   Curl de ejemplo: 
 
+curl --location 'http://localhost:3000/marketplace/getAllByCategory/womens-watches?sortBy=rating&limit=3&offset=1&order=desc' \
+--header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
+
 - (DELETE) marketplace/deleteProductsByCategory
 
   Curl de ejemplo: 
+
+curl --location --request DELETE 'http://localhost:3000/marketplace/deleteAllByCategory/womens-watches' \
+--header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
 
 ## Autenticación
 

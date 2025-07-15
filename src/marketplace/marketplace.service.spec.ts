@@ -56,16 +56,14 @@ describe('MarketplaceService', () => {
 
       jest.spyOn(service, 'validateCategory').mockRejectedValue(new Error('Categoría inválida'));
 
-      await expect(service.deleteAllByCategory(category)).rejects.toThrowError(InternalServerErrorException);
+      await expect(service.deleteAllByCategory(category)).rejects.toThrow(InternalServerErrorException);
     });
 
     it('Debería lanzar InternalServerErrorException si axios falla al obtener productos', async () => {
       const category = 'womens-watches';
 
-      // mockear validación de variables y categoría como exitoso
       jest.spyOn(service, 'validateCategory').mockResolvedValue();
 
-      // forzamos que axios.get falle con un error tipo AxiosError
       (axios.get as jest.Mock).mockRejectedValue({
         isAxiosError: true,
         response: {
@@ -166,15 +164,7 @@ describe('MarketplaceService', () => {
           });
         return Promise.reject(new Error('URL no mockeada'));
       });
-
-      try {
-        const result = await service.getAllByCategory('women-watches', query);
-        fail('La excepcion no fue lanzada.');
-      } catch (error) {
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.response.status).toBe('BadRequestException');
-        expect(error.response.statusCode).toBe(400);
-      }
+      await expect(service.getAllByCategory('women-watches', query)).rejects.toThrow(BadRequestException);
     });
   });
 });

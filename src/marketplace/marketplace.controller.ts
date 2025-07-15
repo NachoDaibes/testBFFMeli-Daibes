@@ -7,6 +7,8 @@ import { GetAllByCategoryMock } from './mock/getAllByCategory.mock';
 import { DeleteAllByCategoryMock } from './mock/deleteAllByCategory.mock';
 import { ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ResponseProductsByQueryDto } from './dto/responseProductsByQuery.dto';
+import { ResponseGetDto } from './dto/responseGet.dto';
+import { ResponseDeleteDto } from './dto/responseDelete.dto';
 
 @ApiTags('Marketplace')
 @Controller('marketplace')
@@ -21,6 +23,7 @@ export class MarketplaceController {
   @ApiSecurity('X-AUTH-TOKEN')
   @ApiOperation({ summary: 'Obtener productos por query.' })
   @ApiOkResponse({
+    description: 'Respuesta exitosa',
     type: ResponseProductsByQueryDto,
   })
   @ApiHeader({
@@ -87,6 +90,9 @@ export class MarketplaceController {
 
   @ApiSecurity('X-AUTH-TOKEN')
   @ApiOperation({ summary: 'Obtener todos los productos de una categoría.' })
+  @ApiOkResponse({
+    type: ResponseGetDto
+  })
   @ApiParam({
     name: 'category',
     required: true,
@@ -163,6 +169,9 @@ export class MarketplaceController {
 
   @ApiSecurity('X-AUTH-TOKEN')
   @ApiOperation({ summary: 'Eliminar todos los productos de una categoría.' })
+  @ApiOkResponse({
+    type: ResponseDeleteDto
+  })
   @ApiParam({
     name: 'category',
     required: true,

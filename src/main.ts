@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors()
   //Configuracion del swagger
   const config = new DocumentBuilder()
     .setTitle('Marketplace API - Daibes')
