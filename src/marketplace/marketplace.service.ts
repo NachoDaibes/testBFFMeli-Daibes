@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import { config } from 'dotenv';
-import { ErrorResponseDto } from './dto/errorResponse.dto';
 import { CategoryDto, ItemDto, ResponseGetDto } from './dto/responseGet.dto';
 import { ResponseDeleteDto } from './dto/responseDelete.dto';
 import { SearchProductsQueryDto, SortParamsDto } from './dto/searchProductsQuery.dto';

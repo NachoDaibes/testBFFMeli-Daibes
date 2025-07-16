@@ -2,9 +2,6 @@ import { Controller, Get, Headers, Param, Delete, UnauthorizedException, Logger,
 import { MarketplaceService } from './marketplace.service';
 import { AuthService } from 'src/auth/auth.service';
 import { SearchProductsQueryDto, SortParamsDto } from './dto/searchProductsQuery.dto';
-import { getProductsByQueryMock } from './mock/mockProductsByQuery.mock';
-import { GetAllByCategoryMock } from './mock/getAllByCategory.mock';
-import { DeleteAllByCategoryMock } from './mock/deleteAllByCategory.mock';
 import { ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ResponseProductsByQueryDto } from './dto/responseProductsByQuery.dto';
 import { ResponseGetDto } from './dto/responseGet.dto';
@@ -23,16 +20,11 @@ export class MarketplaceController {
     private readonly trackerService: TrackerService,
   ) {}
 
-  @ApiSecurity('X-AUTH-TOKEN')
+  @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Obtener productos por query.' })
   @ApiOkResponse({
     description: 'Respuesta exitosa',
     type: ResponseProductsByQueryDto,
-  })
-  @ApiHeader({
-    name: 'x-auth-token',
-    required: true,
-    description: 'Token de autenticación requerido para utilizar el endpoint.',
   })
   @ApiHeader({
     name: 'site',
@@ -76,7 +68,6 @@ export class MarketplaceController {
     this.logger.log(`Query: ${JSON.stringify(query)}`);
 
     //Valido el token
-    const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
     //Creo el objeto TrackerData para guardar en la base de datos los resultados obtenidos
     const trackerData: TrackerDto = {
@@ -84,42 +75,38 @@ export class MarketplaceController {
       operation: 'getProductsByQuery',
       headers: headers,
       queryParams: query,
-      token: headers['x-auth-token'],
+      token: headers['authorization'],
     };
 
-    //De acuerdo al token ingresado es el camino que tomo
-    if (!validateToken.isValid) {
+    /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
+    una excepcion de 'Acceso denegado'*/
+    const validateToken = await this.authService.validateAccess(headers['authorization']);
+    const rolesValidos = ['Administrador'];
+
+    if (validateToken.some(rol => rolesValidos.includes(rol))) {
+      try {
+        const site = headers.site;
+        const response = await this.marketplaceService.getProductsByQuery(site, query);
+        trackerData.statusCode = 200;
+        trackerData.responseBody = response;
+        this.logger.log(`Response: ${response}`);
+        this.trackerService.logRequest(trackerData);
+        return response;
+      } catch (error) {
+        trackerData.error = error;
+        this.trackerService.logRequest(trackerData);
+        return error;
+      }
+    } else {
       this.logger.error('Token inválido. Unauthorized.');
       trackerData.error = 'Unauthorized Exception';
       trackerData.statusCode = 401;
       this.trackerService.logRequest(trackerData);
-
       throw new UnauthorizedException();
-    } else if (validateToken.isMock) {
-      this.logger.log(`Response: ${getProductsByQueryMock}`);
-      trackerData.responseBody = getProductsByQueryMock;
-      trackerData.statusCode = 200;
-      this.trackerService.logRequest(trackerData);
-
-      return getProductsByQueryMock;
-    }
-
-    try {
-      const site = headers.site;
-      const response = await this.marketplaceService.getProductsByQuery(site, query);
-      trackerData.statusCode = 200;
-      trackerData.responseBody = response;
-      this.logger.log(`Response: ${response}`);
-      this.trackerService.logRequest(trackerData);
-      return response;
-    } catch (error) {
-      trackerData.error = error;
-      this.trackerService.logRequest(trackerData);
-      return error;
     }
   }
 
-  @ApiSecurity('X-AUTH-TOKEN')
+  @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Obtener todos los productos de una categoría.' })
   @ApiOkResponse({
     type: ResponseGetDto,
@@ -128,11 +115,6 @@ export class MarketplaceController {
     name: 'category',
     required: true,
     description: 'Categoria por la que se va a buscar.',
-  })
-  @ApiHeader({
-    name: 'x-auth-token',
-    required: true,
-    description: 'Token de autenticación requerido para utilizar el endpoint.',
   })
   @ApiQuery({
     name: 'sortBy',
@@ -170,49 +152,43 @@ export class MarketplaceController {
     this.logger.log(`Category: ${JSON.stringify(category)}`);
     this.logger.log(`Headers: ${JSON.stringify(headers)}`);
 
-    const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
-
     //Creo el objeto TrackerData para guardar en la base de datos los resultados obtenidos
     const trackerData: TrackerDto = {
       method: req.method,
       operation: 'getAllByCategory',
       headers: headers,
       queryParams: category,
-      token: headers['x-auth-token'],
+      token: headers['authorization'],
     };
 
-    //De acuerdo al token ingresado es el camino que tomo
-    if (!validateToken.isValid) {
+    /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
+    una excepcion de 'Acceso denegado'*/
+    const validateToken = await this.authService.validateAccess(headers['authorization']);
+    const rolesValidos = ['Administrador'];
+
+    if (validateToken.some(rol => rolesValidos.includes(rol))) {
+      try {
+        const response = await this.marketplaceService.getAllByCategory(category, sortParamsDto);
+        trackerData.statusCode = 200;
+        trackerData.responseBody = response;
+        this.logger.log(`Response: ${response}`);
+        this.trackerService.logRequest(trackerData);
+        return response;
+      } catch (error) {
+        trackerData.error = error;
+        this.trackerService.logRequest(trackerData);
+        return error;
+      }
+    } else {
       this.logger.error('Token inválido. Unauthorized.');
       trackerData.error = 'Unauthorized Exception';
       trackerData.statusCode = 401;
       this.trackerService.logRequest(trackerData);
-
       throw new UnauthorizedException();
-    } else if (validateToken.isMock) {
-      this.logger.log(`Response: ${GetAllByCategoryMock}`);
-      trackerData.responseBody = GetAllByCategoryMock;
-      trackerData.statusCode = 200;
-      this.trackerService.logRequest(trackerData);
-
-      return GetAllByCategoryMock;
-    }
-
-    try {
-      const response = await this.marketplaceService.getAllByCategory(category, sortParamsDto);
-      this.logger.log(`Response: ${response}`);
-      trackerData.statusCode = 200;
-      trackerData.responseBody = response;
-      this.trackerService.logRequest(trackerData);
-      return response;
-    } catch (error) {
-      trackerData.error = error;
-      this.trackerService.logRequest(trackerData);
-      return error;
     }
   }
 
-  @ApiSecurity('X-AUTH-TOKEN')
+  @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Eliminar todos los productos de una categoría.' })
   @ApiOkResponse({
     type: ResponseDeleteDto,
@@ -222,18 +198,11 @@ export class MarketplaceController {
     required: true,
     description: 'Categoria por la que se va a buscar.',
   })
-  @ApiHeader({
-    name: 'x-auth-token',
-    required: true,
-    description: 'Token de autenticación requerido para utilizar el endpoint.',
-  })
   @Delete('deleteAllByCategory/:category')
   async deleteAllByCategory(@Headers() headers: Record<string, string>, @Param('category') category: string, @Req() req: Request) {
     this.logger.log(`[GET] ${req.url}`);
     this.logger.log(`Headers: ${JSON.stringify(headers)}`);
     this.logger.log(`Category: ${JSON.stringify(category)}`);
-
-    const validateToken = this.authService.validateXAuthToken(headers['x-auth-token']);
 
     //Creo el objeto TrackerData para guardar en la base de datos los resultados obtenidos
     const trackerData: TrackerDto = {
@@ -241,37 +210,32 @@ export class MarketplaceController {
       operation: 'deleteAllByCategory',
       headers: headers,
       queryParams: category,
-      token: headers['x-auth-token'],
+      token: headers['authorization'],
     };
 
-    //De acuerdo al token ingresado es el camino que tomo
-    if (!validateToken.isValid) {
+    /*Valido el token y analizo si alguno de los roles dentro es valido para ejecutar este método, silo es pasa y si no se lanza
+    una excepcion de 'Acceso denegado'*/
+    const validateToken = await this.authService.validateAccess(headers['authorization']);
+    const rolesValidos = ['Administrador'];
+    if (validateToken.some(rol => rolesValidos.includes(rol))) {
+      try {
+        const response = await this.marketplaceService.deleteAllByCategory(category);
+        trackerData.statusCode = 200;
+        trackerData.responseBody = response;
+        this.logger.log(`Response: ${response}`);
+        this.trackerService.logRequest(trackerData);
+        return response;
+      } catch (error) {
+        trackerData.error = error;
+        this.trackerService.logRequest(trackerData);
+        return error;
+      }
+    } else {
       this.logger.error('Token inválido. Unauthorized.');
       trackerData.error = 'Unauthorized Exception';
       trackerData.statusCode = 401;
       this.trackerService.logRequest(trackerData);
-
       throw new UnauthorizedException();
-    } else if (validateToken.isMock) {
-      this.logger.log(`Response: ${DeleteAllByCategoryMock}`);
-      trackerData.responseBody = DeleteAllByCategoryMock;
-      trackerData.statusCode = 200;
-      this.trackerService.logRequest(trackerData);
-
-      return DeleteAllByCategoryMock;
-    }
-
-    try {
-      const response = await this.marketplaceService.deleteAllByCategory(category);
-      this.logger.log(`Response: ${response}`);
-      trackerData.statusCode = 200;
-      trackerData.responseBody = response;
-      this.trackerService.logRequest(trackerData);
-      return response;
-    } catch (error) {
-      trackerData.error = error;
-      this.trackerService.logRequest(trackerData);
-      return error;
     }
   }
 }

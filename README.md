@@ -71,7 +71,7 @@ Para usar esta autenticación:
     - Curl de ejemplo: 
 
 curl --location 'http://localhost:3000/marketplace/getProductsByQuery?q=apple&sortBy=rating&offset=1&limit=4&order=asc' \
---header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjgsInVzZXJSb2xlcyI6WyJVc3VhcmlvIFJlZ3VsYXIiLCJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTc1MjY3MTI5NiwiZXhwIjoxNzUyNjg5Mjk2fQ.jw1jlmjlSjHyupwowUVMytO2gqKJDscz87Issy_zt88' \
 --header 'site: MLA'
 
 - (GET) martketplace/getProductsByCategory
@@ -79,14 +79,14 @@ curl --location 'http://localhost:3000/marketplace/getProductsByQuery?q=apple&so
     - Curl de ejemplo: 
 
 curl --location 'http://localhost:3000/marketplace/getAllByCategory/womens-watches?sortBy=rating&limit=3&offset=1&order=desc' \
---header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjgsInVzZXJSb2xlcyI6WyJVc3VhcmlvIFJlZ3VsYXIiLCJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTc1MjY3MTI5NiwiZXhwIjoxNzUyNjg5Mjk2fQ.jw1jlmjlSjHyupwowUVMytO2gqKJDscz87Issy_zt88'
 
 - (DELETE) marketplace/deleteProductsByCategory
 
     - Curl de ejemplo: 
 
 curl --location --request DELETE 'http://localhost:3000/marketplace/deleteAllByCategory/womens-watches' \
---header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjgsInVzZXJSb2xlcyI6WyJVc3VhcmlvIFJlZ3VsYXIiLCJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTc1MjY3MTI5NiwiZXhwIjoxNzUyNjg5Mjk2fQ.jw1jlmjlSjHyupwowUVMytO2gqKJDscz87Issy_zt88'
 
 ## Variables de entorno
 

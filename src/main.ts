@@ -12,7 +12,7 @@ async function bootstrap() {
     .setDescription('Documentación de la API de Marketplace')
     .setVersion('1.0')
     .addTag('marketplace')
-    .addApiKey({ type: 'apiKey', name: 'x-auth-token', in: 'header' }, 'X-AUTH-TOKEN')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', name: 'Authorization', in: 'header' }, 'Authorization')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
