@@ -46,8 +46,6 @@ describe('MarketplaceService', () => {
       expect(result).toEqual({
         result: 'OK',
         items_delete: 2,
-        items_failed: 0,
-        items_failed_ids: [],
       });
     });
 

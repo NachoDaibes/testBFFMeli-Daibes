@@ -3,16 +3,21 @@ import { MarketplaceController } from './marketplace.controller';
 import { MarketplaceService } from './marketplace.service';
 import { AuthService } from 'src/auth/auth.service';
 import { getProductsByQueryMock } from './mock/mockProductsByQuery.mock';
+import { TrackerService } from 'src/tracker/tracker.service';
 
 describe('MarketplaceController', () => {
   let controller: MarketplaceController;
   let authService: {validateXAuthToken: jest.Mock};
+  let trackerService: {logRequest: jest.Mock}
   let marketplaceService: MarketplaceService;
   const req = { method: 'GET', url: '/marketplace/getProductsByQuery' } as Request;
 
   beforeEach(async () => {
     const mockAuthService = {
       validateXAuthToken: jest.fn(),
+    };
+    const mockTrackerService = {
+      logRequest: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -23,12 +28,17 @@ describe('MarketplaceController', () => {
           provide: AuthService,
           useValue: mockAuthService
         },
+        {
+          provide: TrackerService,
+          useValue: mockTrackerService
+        },
       ],
     }).compile();
 
     marketplaceService = module.get<MarketplaceService>(MarketplaceService);
-    authService = mockAuthService
     controller = module.get<MarketplaceController>(MarketplaceController);
+    authService = mockAuthService
+    trackerService = mockTrackerService
   });
 
   it('debería devolver datos mock si el token es alternativo', async () => {

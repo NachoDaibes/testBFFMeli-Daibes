@@ -4,7 +4,19 @@ Challenge técnico de Mercado Libre resuelto por **Juan Ignacio Daibes**.
 
 ## Breve explicación
 
-Con este código presento la solución que encontré para el challenge técnico que me enviaron. Para resolverlo utilicé nestjs (que es un framework de nodejs), typescript, swagger y para los test utilicé jest junto con la librería de testing que proporciona nestjs.
+Con este código presento la solución que desarrollé para el challenge técnico propuesto. Para resolverlo utilicé nestjs (que es un framework de nodejs), typescript, swagger y para los test utilicé jest junto con la librería de testing que proporciona nestjs.
+
+## Aclaración importante sobre el acceso a la base de datos
+
+Para ciertas funcionalidades de este proyecto, creé un servidor en Google Cloud y dentro de él una base de datos, y el acceso se configuró para permitir conexiones desde un amplio rango de direcciones IP.
+
+En caso de que encuentre dificultades al desplegar el proyecto, es posible que la dirección IP del evaluador no esté dentro de los rangos autorizados.
+
+Los rangos de IP actualmente habilitados son los siguientes:
+  - 191.0.0.0/8
+  - 190.0.0.0/8
+  - 200.0.0.0/7
+  - 181.0.0.0/8
 
 ### Autenticación
 
@@ -76,11 +88,6 @@ curl --location 'http://localhost:3000/marketplace/getAllByCategory/womens-watch
 curl --location --request DELETE 'http://localhost:3000/marketplace/deleteAllByCategory/womens-watches' \
 --header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
 
-## Autenticación
-
-Se valida el header "x-auth-token". En caso de ser un token válido, se permitirá el acceso al método, en caso de ser un 
-token alternativo se retornará un ejemplo mockeado y en caso de ser un token inválido se retornará 401 Unauthorized.
-
 ## Variables de entorno
 
 - (Credenciales para la conexion a la DB con un usuario con permisos limitados)
@@ -118,6 +125,13 @@ curl -X 'GET' \
 curl -X 'GET' \
   'http://localhost:3000/tracker/getTrackingByToken?token=e962f81a-4d42-4eb3-86cd-a25e7237c8' \
   -H 'accept: */*'
+
+## Test
+
+### Ejecución de los test
+   ```bash
+   npm run test
+   ```
 
 ## Estructura de ramas en GitHub
 
