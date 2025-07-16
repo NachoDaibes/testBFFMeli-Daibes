@@ -56,7 +56,7 @@ Para usar esta autenticación:
 
 - (GET) marketplace/getProductsByQuery
 
-  Curl de ejemplo: 
+    - Curl de ejemplo: 
 
 curl --location 'http://localhost:3000/marketplace/getProductsByQuery?q=apple&sortBy=rating&offset=1&limit=4&order=asc' \
 --header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc' \
@@ -64,14 +64,14 @@ curl --location 'http://localhost:3000/marketplace/getProductsByQuery?q=apple&so
 
 - (GET) martketplace/getProductsByCategory
 
-  Curl de ejemplo: 
+    - Curl de ejemplo: 
 
 curl --location 'http://localhost:3000/marketplace/getAllByCategory/womens-watches?sortBy=rating&limit=3&offset=1&order=desc' \
 --header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
 
 - (DELETE) marketplace/deleteProductsByCategory
 
-  Curl de ejemplo: 
+    - Curl de ejemplo: 
 
 curl --location --request DELETE 'http://localhost:3000/marketplace/deleteAllByCategory/womens-watches' \
 --header 'x-auth-token: e962f81a-4d42-4eb3-86cd-a25e7237c8dc'
@@ -100,6 +100,24 @@ token alternativo se retornará un ejemplo mockeado y en caso de ser un token in
 - (Token Valido y token mock)
     - VALID_TOKEN=e962f81a-4d42-4eb3-86cd-a25e7237c8dc
     - MOCK_TOKEN=55a4639f-55e8-4e14-a6cc-b79977b20a4e
+
+## Tracker
+Hice un pequeño tracker para registrar los movimientos realizados sobre los 3 endpoints  mencionados anteriormente.
+
+### Endpoints disponibles
+
+- GET tracker/getTrackingByOperation
+    - Curl de ejemplo:     
+curl -X 'GET' \
+  'http://localhost:3000/tracker/getTrackingByOperation?operation=getProductsByQuery' \
+  -H 'accept: */*'
+
+- GET tracker/getTrackingByToken
+    - Curl de ejemplo: 
+
+curl -X 'GET' \
+  'http://localhost:3000/tracker/getTrackingByToken?token=e962f81a-4d42-4eb3-86cd-a25e7237c8' \
+  -H 'accept: */*'
 
 ## Estructura de ramas en GitHub
 
