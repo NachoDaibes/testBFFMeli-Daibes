@@ -30,7 +30,7 @@ La autenticación se realiza mediante el envío de un header "x-auth-token". Dep
 
 
 #### Otra rama con autenticación alternativa
-En la rama feature/auth está la misma solución pero con un método de autenticación distinto. En este caso, armé un pequeño modelo que incluye las entidades User, Role, Session y UserRole, con tres endpoints ubicados en src/auth/auth.controller.ts.
+En la rama feature/solucionConLogin está la misma solución pero con un método de autenticación distinto. En este caso, armé un pequeño modelo que incluye las entidades User, Role, Session y UserRole, con tres endpoints ubicados en src/auth/auth.controller.ts.
 
 Para usar esta autenticación:
 
