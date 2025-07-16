@@ -9,6 +9,8 @@ import { Session } from './entities/session.entity';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { TrackerModule } from './tracker/tracker.module';
+import { Tracker } from './entities/tracker.entity';
 
 @Module({
   imports: [
@@ -24,12 +26,13 @@ import { MarketplaceModule } from './marketplace/marketplace.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [
-        User, Role, UserRole, Session 
+        User, Role, UserRole, Session, Tracker
       ],
       synchronize: true,
     }),
     AuthModule,
-    MarketplaceModule
+    MarketplaceModule,
+    TrackerModule
   ],
   controllers: [AppController],
   providers: [AppService],

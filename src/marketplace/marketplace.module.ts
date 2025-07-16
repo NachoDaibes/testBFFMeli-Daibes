@@ -8,12 +8,14 @@ import { Role } from 'src/entities/role.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Session } from 'src/entities/session.entity';
+import { TrackerService } from 'src/tracker/tracker.service';
+import { Tracker } from 'src/entities/tracker.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Session, UserRole, Role])
+    TypeOrmModule.forFeature([User, Session, UserRole, Role, Tracker])
   ],
   controllers: [MarketplaceController],
-  providers: [MarketplaceService, AuthService, JwtService],
+  providers: [MarketplaceService, AuthService, JwtService, TrackerService],
 })
 export class MarketplaceModule {}
